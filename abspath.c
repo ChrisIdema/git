@@ -303,13 +303,22 @@ char *prefix_filename_except_for_dash(const char *pfx, const char *arg)
 
 void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 {
+	fprintf(stderr, "strbuf_add_absolute_path %s\n", path);
 	if (!*path)
 		die("The empty string is not a valid path");
 	if (!is_absolute_path(path)) {
+		fprintf(stderr, "path is not abs\n");
 		struct stat cwd_stat, pwd_stat;
 		size_t orig_len = sb->len;
 		char *cwd = xgetcwd();
 		char *pwd = getenv("PWD");
+		fprintf(stderr, "cwd: %s\n", cwd);
+		fprintf(stderr, "pwd: %s\n", pwd);
+		fprintf(stderr, "!stat(cwd, &cwd_stat): %d\n", !stat(cwd, &cwd_stat));
+		fprintf(stderr, "(cwd_stat.st_dev || cwd_stat.st_ino): %d\n", (cwd_stat.st_dev || cwd_stat.st_ino));
+		fprintf(stderr, "!stat(pwd, &pwd_stat): %d\n", !stat(pwd, &pwd_stat));
+		fprintf(stderr, "pwd_stat.st_dev == cwd_stat.st_dev: %d\n", pwd_stat.st_dev == cwd_stat.st_dev);
+		fprintf(stderr, "pwd_stat.st_ino == cwd_stat.st_ino: %d\n", pwd_stat.st_ino == cwd_stat.st_ino);
 		if (pwd && strcmp(pwd, cwd) &&
 		    !stat(cwd, &cwd_stat) &&
 		    (cwd_stat.st_dev || cwd_stat.st_ino) &&
@@ -324,6 +333,8 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		free(cwd);
 	}
 	strbuf_addstr(sb, path);
+
+	fprintf(stderr, "sb: %.*s\n\n", sb->len, sb->buf);
 }
 
 void strbuf_add_real_path(struct strbuf *sb, const char *path)

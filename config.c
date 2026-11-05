@@ -253,10 +253,10 @@ static int include_by_path(const struct key_value_info *kvi,
 	fprintf(stderr, "cond: %s\n", cond);
 	
 
-	// strbuf_realpath(&text, path, 1);
-	// fprintf(stderr, "path real: %.*s\n", text.len, text.buf);
-	strbuf_logicalpath(&text, path, 1);
-	fprintf(stderr, "path logical: %.*s\n", text.len, text.buf);
+	strbuf_realpath(&text, path, 1);
+	fprintf(stderr, "path real: %.*s\n", text.len, text.buf);
+	//strbuf_logicalpath(&text, path, 1);
+	//fprintf(stderr, "path logical: %.*s\n", text.len, text.buf);
 	strbuf_add(&pattern, cond, cond_len);
 	fprintf(stderr, "pattern: %.*s\n", pattern.len, pattern.buf);
 	ret = prepare_include_condition_pattern(kvi, &pattern, &prefix);
@@ -293,7 +293,7 @@ again:
 		 * which'll do the right thing
 		 */
 		strbuf_reset(&text);
-		strbuf_add_absolute_path(&text, path);
+		strbuf_add_absolute_path(&text, path);		
 		fprintf(stderr, "path abs: %.*s\n", text.len, text.buf);
 
 		// struct strbuf pattern_copy = STRBUF_INIT;

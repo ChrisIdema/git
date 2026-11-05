@@ -615,9 +615,6 @@ int strbuf_getcwd(struct strbuf *sb)
 		strbuf_grow(sb, guessed_len);
 		if (getcwd(sb->buf, sb->alloc)) {
 			strbuf_setlen(sb, strlen(sb->buf));
-			// fprintf(stderr, "strbuf_getcwd: %.*s\n", sb->len, sb->buf);
-			// const char *pwd = getenv("PWD");
-			// fprintf(stderr, "PWD: %s\n", pwd);
 			return 0;
 		}
 
