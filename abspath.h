@@ -4,6 +4,8 @@
 int is_directory(const char *);
 char *strbuf_realpath(struct strbuf *resolved, const char *path,
 		      int die_on_error);
+char *strbuf_logicalpath(struct strbuf *resolved, const char *path, 
+			  int die_on_error);
 char *strbuf_realpath_forgiving(struct strbuf *resolved, const char *path,
 				int die_on_error);
 char *real_pathdup(const char *path, int die_on_error);

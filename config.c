@@ -253,12 +253,14 @@ static int include_by_path(const struct key_value_info *kvi,
 	fprintf(stderr, "cond: %s\n", cond);
 	
 
-	strbuf_realpath(&text, path, 1);
-	fprintf(stderr, "text: %.*s\n", text.len, text.buf);
+	// strbuf_realpath(&text, path, 1);
+	// fprintf(stderr, "path real: %.*s\n", text.len, text.buf);
+	strbuf_logicalpath(&text, path, 1);
+	fprintf(stderr, "path logical: %.*s\n", text.len, text.buf);
 	strbuf_add(&pattern, cond, cond_len);
 	fprintf(stderr, "pattern: %.*s\n", pattern.len, pattern.buf);
 	ret = prepare_include_condition_pattern(kvi, &pattern, &prefix);
-	fprintf(stderr, "prepare_include_condition_pattern: %i\n", ret);
+	// fprintf(stderr, "prepare_include_condition_pattern: %i\n", ret);
 	if (ret < 0)
 		goto done;
 
@@ -292,7 +294,13 @@ again:
 		 */
 		strbuf_reset(&text);
 		strbuf_add_absolute_path(&text, path);
-		fprintf(stderr, "text: %.*s\n", text.len, text.buf);
+		fprintf(stderr, "path abs: %.*s\n", text.len, text.buf);
+
+		// struct strbuf pattern_copy = STRBUF_INIT;
+		// strbuf_add(&pattern_copy, cond, cond_len);
+		// strbuf_add_real_path(&pattern, pattern_copy.buf);
+		// fprintf(stderr, "pattern abs: %.*s\n", pattern.len, pattern.buf);
+		
 		already_tried_absolute = 1;
 		goto again;
 	}
@@ -300,7 +308,7 @@ done:
 	strbuf_release(&pattern);
 	strbuf_release(&text);
 
-	fprintf(stderr, "include_by_path() ret: %i\n", ret);
+	fprintf(stderr, "include_by_path() ret: %i\n\n", ret);
 	return ret;
 }
 

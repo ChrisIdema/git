@@ -548,6 +548,11 @@ int strbuf_getwholeline_fd(struct strbuf *sb, int fd, int term);
 int strbuf_getcwd(struct strbuf *sb);
 
 /**
+ * Same as strbuf_getcwd, but with symlinks preserved
+ */
+int strbuf_getlogicalcwd(struct strbuf *sb);
+
+/**
  * Normalize in-place the path contained in the strbuf. See
  * normalize_path_copy() for details. If an error occurs, the contents of "sb"
  * are left untouched, and -1 is returned.

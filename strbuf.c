@@ -615,8 +615,51 @@ int strbuf_getcwd(struct strbuf *sb)
 		strbuf_grow(sb, guessed_len);
 		if (getcwd(sb->buf, sb->alloc)) {
 			strbuf_setlen(sb, strlen(sb->buf));
+			// fprintf(stderr, "strbuf_getcwd: %.*s\n", sb->len, sb->buf);
+			// const char *pwd = getenv("PWD");
+			// fprintf(stderr, "PWD: %s\n", pwd);
 			return 0;
 		}
+
+		/*
+		 * If getcwd(3) is implemented as a syscall that falls
+		 * back to a regular lookup using readdir(3) etc. then
+		 * we may be able to avoid EACCES by providing enough
+		 * space to the syscall as it's not necessarily bound
+		 * to the same restrictions as the fallback.
+		 */
+		if (errno == EACCES && guessed_len < PATH_MAX)
+			continue;
+
+		if (errno != ERANGE)
+			break;
+	}
+	if (oldalloc == 0)
+		strbuf_release(sb);
+	else
+		strbuf_reset(sb);
+	return -1;
+}
+
+int strbuf_getlogicalcwd(struct strbuf *sb)
+{
+	size_t oldalloc = sb->alloc;
+	size_t guessed_len = 128;
+
+	for (;; guessed_len *= 2) {
+		strbuf_grow(sb, guessed_len);
+		const char *pwd = getenv("PWD"); // todo move out of loop
+		if (pwd) {
+			size_t len = strlen(pwd);
+			if (len < sb->alloc)
+			{		
+				memcpy(sb->buf, pwd, len);
+				strbuf_setlen(sb, len);
+				fprintf(stderr, "strbuf_getlogicalcwd: %.*s\n", sb->len, sb->buf);
+				return 0;
+			}
+		}
+		else
 
 		/*
 		 * If getcwd(3) is implemented as a syscall that falls

@@ -75,6 +75,8 @@ static void get_root_part(struct strbuf *resolved, struct strbuf *remaining)
 #define REALPATH_MANY_MISSING (1 << 0)
 /* Should we die if there's an error? */
 #define REALPATH_DIE_ON_ERROR (1 << 1)
+/* Preserve symlinks */
+#define REALPATH_LOGICAL (1 << 2)
 
 static char *strbuf_realpath_1(struct strbuf *resolved, const char *path,
 			       int flags)
@@ -98,7 +100,9 @@ static char *strbuf_realpath_1(struct strbuf *resolved, const char *path,
 
 	if (!resolved->len) {
 		/* relative path; can use CWD as the initial resolved path */
-		if (strbuf_getcwd(resolved)) {
+		int res = (flags & REALPATH_LOGICAL) ? strbuf_getlogicalcwd(resolved) : strbuf_getcwd(resolved);
+		
+		if (res) {
 			if (flags & REALPATH_DIE_ON_ERROR)
 				die_errno("unable to get current working directory");
 			else
@@ -218,6 +222,13 @@ char *strbuf_realpath(struct strbuf *resolved, const char *path,
 {
 	return strbuf_realpath_1(resolved, path,
 				 die_on_error ? REALPATH_DIE_ON_ERROR : 0);
+}
+
+char *strbuf_logicalpath(struct strbuf *resolved, const char *path,
+		      int die_on_error)
+{
+	return strbuf_realpath_1(resolved, path,
+				 (die_on_error ? REALPATH_DIE_ON_ERROR : 0) | REALPATH_LOGICAL);
 }
 
 /*
