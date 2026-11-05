@@ -248,9 +248,17 @@ static int include_by_path(const struct key_value_info *kvi,
 	if (!path)
 		goto done;
 
+	fprintf(stderr, "include_by_path()\n");
+	fprintf(stderr, "path: %s\n", path);
+	fprintf(stderr, "cond: %s\n", cond);
+	
+
 	strbuf_realpath(&text, path, 1);
+	fprintf(stderr, "text: %.*s\n", text.len, text.buf);
 	strbuf_add(&pattern, cond, cond_len);
+	fprintf(stderr, "pattern: %.*s\n", pattern.len, pattern.buf);
 	ret = prepare_include_condition_pattern(kvi, &pattern, &prefix);
+	fprintf(stderr, "prepare_include_condition_pattern: %i\n", ret);
 	if (ret < 0)
 		goto done;
 
@@ -271,6 +279,8 @@ again:
 	ret = !wildmatch(pattern.buf + prefix, text.buf + prefix,
 			 WM_PATHNAME | (icase ? WM_CASEFOLD : 0));
 
+			
+
 	if (!ret && !already_tried_absolute) {
 		/*
 		 * We've tried e.g. matching gitdir:~/work, but if
@@ -282,12 +292,15 @@ again:
 		 */
 		strbuf_reset(&text);
 		strbuf_add_absolute_path(&text, path);
+		fprintf(stderr, "text: %.*s\n", text.len, text.buf);
 		already_tried_absolute = 1;
 		goto again;
 	}
 done:
 	strbuf_release(&pattern);
 	strbuf_release(&text);
+
+	fprintf(stderr, "include_by_path() ret: %i\n", ret);
 	return ret;
 }
 
