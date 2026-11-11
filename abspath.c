@@ -315,8 +315,10 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		fprintf(stderr, "cwd: %s\n", cwd);
 		fprintf(stderr, "pwd: %s\n", pwd);
 		fprintf(stderr, "!stat(cwd, &cwd_stat): %d\n", !stat(cwd, &cwd_stat));
+		fprintf(stderr, "cwd_stat.st_dev=%d\ncwd_stat.st_ino=%d\n",cwd_stat.st_dev,cwd_stat.st_ino);
 		fprintf(stderr, "(cwd_stat.st_dev || cwd_stat.st_ino): %d\n", (cwd_stat.st_dev || cwd_stat.st_ino));
 		fprintf(stderr, "!stat(pwd, &pwd_stat): %d\n", !stat(pwd, &pwd_stat));
+		fprintf(stderr, "pwd_stat.st_dev=%d\npwd_stat.st_ino=%d\n",pwd_stat.st_dev,pwd_stat.st_ino);
 		fprintf(stderr, "pwd_stat.st_dev == cwd_stat.st_dev: %d\n", pwd_stat.st_dev == cwd_stat.st_dev);
 		fprintf(stderr, "pwd_stat.st_ino == cwd_stat.st_ino: %d\n", pwd_stat.st_ino == cwd_stat.st_ino);
 		if (pwd && strcmp(pwd, cwd) &&
