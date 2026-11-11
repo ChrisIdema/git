@@ -1314,14 +1314,15 @@ static int get_file_info_by_handle(HANDLE hnd, struct stat *buf)
 		return -1;
 	}
 
-	buf->st_ino = 0;
+	buf->st_ino =  	((uint64_t)fdata.nFileIndexHigh << 32) |
+					((uint64_t)fdata.nFileIndexLow << 0);
 	buf->st_gid = 0;
 	buf->st_uid = 0;
 	buf->st_nlink = 1;
 	buf->st_mode = file_attr_to_st_mode(fdata.dwFileAttributes, 0);
 	buf->st_size = fdata.nFileSizeLow |
 		(((off_t)fdata.nFileSizeHigh)<<32);
-	buf->st_dev = buf->st_rdev = 0; /* not used by Git */
+	buf->st_dev = buf->st_rdev = fdata.dwVolumeSerialNumber;
 	filetime_to_timespec(&(fdata.ftLastAccessTime), &(buf->st_atim));
 	filetime_to_timespec(&(fdata.ftLastWriteTime), &(buf->st_mtim));
 	filetime_to_timespec(&(fdata.ftCreationTime), &(buf->st_ctim));
