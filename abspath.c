@@ -300,11 +300,12 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		char *cwd = xgetcwd();
 		char *pwd = getenv("PWD");
 		if (pwd && strcmp(pwd, cwd) &&
-		    !stat(cwd, &cwd_stat) &&
-		    (cwd_stat.st_dev || cwd_stat.st_ino) &&
-		    !stat(pwd, &pwd_stat) &&
-		    pwd_stat.st_dev == cwd_stat.st_dev &&
-		    pwd_stat.st_ino == cwd_stat.st_ino)
+			!stat(cwd, &cwd_stat) &&
+			!stat(pwd, &pwd_stat) &&
+			(!(cwd_stat.st_dev || cwd_stat.st_ino || pwd_stat.st_dev || pwd_stat.st_ino) ||
+			((cwd_stat.st_dev || cwd_stat.st_ino) &&
+			pwd_stat.st_dev == cwd_stat.st_dev &&
+			pwd_stat.st_ino == cwd_stat.st_ino)))
 			strbuf_addstr(sb, pwd);
 		else
 			strbuf_addstr(sb, cwd);
