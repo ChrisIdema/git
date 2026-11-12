@@ -1134,6 +1134,7 @@ static void repo_discover_explicit_gitdir(struct repo_discovery *discovery,
 					  struct strbuf *cwd,
 					  int *nongit_ok)
 {
+	fprintf(stderr, "repo_discover_explicit_gitdir\n");
 	const char *work_tree_env = getenv(GIT_WORK_TREE_ENVIRONMENT);
 	char *gitfile;
 	int offset;
@@ -1146,6 +1147,8 @@ static void repo_discover_explicit_gitdir(struct repo_discovery *discovery,
 		gitfile = xstrdup(gitfile);
 		gitdirenv = gitfile;
 	}
+
+	fprintf(stderr, "gitfile:%s\n",gitfile);
 
 	if (!is_git_directory(gitdirenv)) {
 		if (nongit_ok) {
@@ -1222,15 +1225,22 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 					  struct strbuf *cwd, int offset,
 					  int *nongit_ok)
 {
-	if (read_and_verify_repository_format(&discovery->format, gitdir, nongit_ok))
+	fprintf(stderr, "repo_discover_implicit_gitdir\n");
+	if (read_and_verify_repository_format(&discovery->format, gitdir, nongit_ok)){
+		fprintf(stderr, "read_and_verify_repository_format!=0\n");
 		return;
+	}
 
 	/* --work-tree is set without --git-dir; use discovered one */
 	if (getenv(GIT_WORK_TREE_ENVIRONMENT) || discovery->format.work_tree) {
 		char *to_free = NULL;
+		fprintf(stderr, "condition1\n");
 
-		if (offset != cwd->len && !is_absolute_path(gitdir))
+		if (offset != cwd->len && !is_absolute_path(gitdir)) {
+			fprintf(stderr, "condition2\n");
 			gitdir = to_free = real_pathdup(gitdir, 1);
+			fprintf(stderr, "gitdir:%s\n",gitdir);
+		}
 		if (chdir(cwd->buf))
 			die_errno(_("cannot come back to cwd"));
 		repo_discover_explicit_gitdir(discovery, gitdir, cwd,
@@ -1241,6 +1251,7 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 
 	/* #16.2, #17.2, #20.2, #21.2, #24, #25, #28, #29 (see t1510) */
 	if (discovery->format.is_bare > 0) {
+		fprintf(stderr, "condition3\n");
 		repo_discovery_set_gitdir(discovery, gitdir, (offset != cwd->len));
 		if (chdir(cwd->buf))
 			die_errno(_("cannot come back to cwd"));
@@ -1248,11 +1259,17 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 	}
 
 	/* #0, #1, #5, #8, #9, #12, #13 */
+	fprintf(stderr, "tes1t: %s\n", discovery->worktree);
 	repo_discovery_set_worktree(discovery, ".");
-	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT))
+	fprintf(stderr, "test2: %s\n", discovery->worktree);
+	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT)){		
+		fprintf(stderr, "condition4\n");
 		repo_discovery_set_gitdir(discovery, gitdir, 0);
-	if (offset >= cwd->len)
+	}
+	if (offset >= cwd->len){
+		fprintf(stderr, "condition5\n");
 		return;
+	}
 
 	/* Make "offset" point past the '/' (already the case for root dirs) */
 	if (offset != offset_1st_component(cwd->buf))
@@ -1958,6 +1975,28 @@ static void set_git_work_tree(struct repository *repo, const char *new_work_tree
 	repo_set_worktree(repo, new_work_tree);
 }
 
+void strbuf_add_pwd(struct strbuf *sb)
+{
+	struct stat cwd_stat, pwd_stat;
+	//size_t orig_len = sb->len;
+	char *cwd = xgetcwd();
+	char *pwd = getenv("PWD");
+	if (pwd && strcmp(pwd, cwd) &&
+		!stat(cwd, &cwd_stat) &&
+		(cwd_stat.st_dev || cwd_stat.st_ino) &&
+		!stat(pwd, &pwd_stat) &&
+		pwd_stat.st_dev == cwd_stat.st_dev &&
+		pwd_stat.st_ino == cwd_stat.st_ino)
+		strbuf_addstr(sb, pwd);
+	else
+		strbuf_addstr(sb, cwd);
+	// if (sb->len > orig_len && !is_dir_sep(sb->buf[sb->len - 1]))
+	// 	strbuf_addch(sb, '/');
+	free(cwd);
+	
+	// strbuf_addstr(sb, path);
+}
+
 static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 {
 	struct strbuf cwd = STRBUF_INIT;
@@ -1971,8 +2010,11 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 	if (nongit_ok)
 		*nongit_ok = 0;
 
-	if (strbuf_getcwd(&cwd))
-		die_errno(_("Unable to read current working directory"));
+	// if (strbuf_getcwd(&cwd))
+	// 	die_errno(_("Unable to read current working directory"));
+
+	strbuf_add_pwd(&cwd);
+
 	strbuf_addbuf(&dir, &cwd);
 
 	switch (repo_discovery_find_dir(&dir, &gitdir, &report, 1)) {
@@ -1983,8 +2025,12 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 	case GIT_DIR_DISCOVERED:
 		if (dir.len < cwd.len && chdir(dir.buf))
 			die(_("cannot change to '%s'"), dir.buf);
+		fprintf(stderr, "dir: %s\n", dir.buf);
 		repo_discover_implicit_gitdir(discovery, gitdir.buf, &cwd, dir.len,
 					      nongit_ok);
+		fprintf(stderr, "discovery.gitdir: %s\n", discovery->gitdir);
+		fprintf(stderr, "discovery.worktree: %s\n", discovery->worktree);
+		fprintf(stderr, "discovery.prefix: %s\n", discovery->prefix);
 		break;
 	case GIT_DIR_BARE:
 		if (dir.len < cwd.len && chdir(dir.buf))
