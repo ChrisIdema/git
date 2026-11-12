@@ -1232,7 +1232,6 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 
 		if (offset != cwd->len && !is_absolute_path(gitdir))
 			gitdir = to_free = real_pathdup(gitdir, 1);
-
 		if (chdir(cwd->buf))
 			die_errno(_("cannot come back to cwd"));
 		repo_discover_explicit_gitdir(discovery, gitdir, cwd,
@@ -1251,12 +1250,10 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 
 	/* #0, #1, #5, #8, #9, #12, #13 */
 	repo_discovery_set_worktree(discovery, ".");
-	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT)){
+	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT))
 		repo_discovery_set_gitdir(discovery, gitdir, 0);
-	}
-	if (offset >= cwd->len){
+	if (offset >= cwd->len)
 		return;
-	}
 
 	/* Make "offset" point past the '/' (already the case for root dirs) */
 	if (offset != offset_1st_component(cwd->buf))
@@ -2010,7 +2007,7 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 					      nongit_ok);
 		break;
 	case GIT_DIR_DISCOVERED:
-		if (dir.len < cwd.len && chdir(dir.buf)) // chdir modifies cwd, so cwd and pwd no longer match
+		if (dir.len < cwd.len && chdir(dir.buf))
 			die(_("cannot change to '%s'"), dir.buf);
 		repo_discover_implicit_gitdir(discovery, gitdir.buf, &cwd, dir.len,
 					      nongit_ok);
@@ -2085,7 +2082,6 @@ const char *setup_git_directory_gently(struct repository *repo, int *nongit_ok)
 	 * configuration (including the per-repo config file that we
 	 * ignored previously).
 	 */
-
 	repo_config_clear(repo);
 
 	repo_discover(&discovery, nongit_ok);
