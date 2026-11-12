@@ -1959,28 +1959,6 @@ static void set_git_work_tree(struct repository *repo, const char *new_work_tree
 	repo_set_worktree(repo, new_work_tree);
 }
 
-void strbuf_add_pwd(struct strbuf *sb)
-{
-	struct stat cwd_stat, pwd_stat;
-	//size_t orig_len = sb->len;
-	char *cwd = xgetcwd();
-	char *pwd = getenv("PWD");
-	if (pwd && strcmp(pwd, cwd) &&
-		!stat(cwd, &cwd_stat) &&
-		(cwd_stat.st_dev || cwd_stat.st_ino) &&
-		!stat(pwd, &pwd_stat) &&
-		pwd_stat.st_dev == cwd_stat.st_dev &&
-		pwd_stat.st_ino == cwd_stat.st_ino)
-		strbuf_addstr(sb, pwd);
-	else
-		strbuf_addstr(sb, cwd);
-	// if (sb->len > orig_len && !is_dir_sep(sb->buf[sb->len - 1]))
-	// 	strbuf_addch(sb, '/');
-	free(cwd);
-
-	// strbuf_addstr(sb, path);
-}
-
 static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 {
 	struct strbuf cwd = STRBUF_INIT;

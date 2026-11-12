@@ -290,6 +290,23 @@ char *prefix_filename_except_for_dash(const char *pfx, const char *arg)
 	return prefix_filename(pfx, arg);
 }
 
+void strbuf_add_pwd(struct strbuf *sb)
+{
+	struct stat cwd_stat, pwd_stat;
+	char *cwd = xgetcwd();
+	char *pwd = getenv("PWD");
+	if (pwd && strcmp(pwd, cwd) &&
+		!stat(cwd, &cwd_stat) &&
+		(cwd_stat.st_dev || cwd_stat.st_ino) &&
+		!stat(pwd, &pwd_stat) &&
+		pwd_stat.st_dev == cwd_stat.st_dev &&
+		pwd_stat.st_ino == cwd_stat.st_ino)
+		strbuf_addstr(sb, pwd);
+	else
+		strbuf_addstr(sb, cwd);
+	free(cwd);
+}
+
 void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 {
 	if (!*path)
