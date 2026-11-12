@@ -1126,7 +1126,8 @@ static void repo_discovery_set_worktree(struct repo_discovery *r,
 					const char *worktree)
 {
 	free(r->worktree);
-	r->worktree = real_pathdup(worktree, 1);
+	//r->worktree = real_pathdup(worktree, 1);
+	r->worktree = absolute_pathdup(worktree);
 }
 
 static void repo_discover_explicit_gitdir(struct repo_discovery *discovery,
@@ -1971,8 +1972,11 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 	if (nongit_ok)
 		*nongit_ok = 0;
 
-	if (strbuf_getcwd(&cwd))
-		die_errno(_("Unable to read current working directory"));
+	// if (strbuf_getcwd(&cwd))
+	// 	die_errno(_("Unable to read current working directory"));
+
+	strbuf_add_pwd(&cwd);
+
 	strbuf_addbuf(&dir, &cwd);
 
 	switch (repo_discovery_find_dir(&dir, &gitdir, &report, 1)) {

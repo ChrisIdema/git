@@ -1084,6 +1084,7 @@ int mingw_chdir(const char *dirname)
 		CloseHandle(hnd);
 	}
 
+	setenv("PWD", dirname, 1); // update PWD
 	return _wchdir(normalize_ntpath(wdirname));
 }
 

@@ -37,6 +37,13 @@ static inline int is_absolute_path(const char *path)
  */
 void strbuf_add_absolute_path(struct strbuf *sb, const char *path);
 
+
+/**
+ * Add pwd to a buffer if cwd and pwd refer to same location, 
+ * otherwise add cwd
+ */
+void strbuf_add_pwd(struct strbuf *sb);
+
 /**
  * Canonize `path` (make it absolute, resolve symlinks, remove extra
  * slashes) and append it to `sb`.  Die with an informative error
