@@ -299,6 +299,8 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		size_t orig_len = sb->len;
 		char *cwd = xgetcwd();
 		char *pwd = getenv("PWD");
+		fprintf(stderr, "cwd %s\n",cwd);
+		fprintf(stderr, "pwd %s\n",pwd);
 		if (pwd && strcmp(pwd, cwd) &&
 		    !stat(cwd, &cwd_stat) &&
 		    (cwd_stat.st_dev || cwd_stat.st_ino) &&
@@ -311,8 +313,9 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		if (sb->len > orig_len && !is_dir_sep(sb->buf[sb->len - 1]))
 			strbuf_addch(sb, '/');
 		free(cwd);
-	}
+	}	
 	strbuf_addstr(sb, path);
+	fprintf(stderr, "sb %s\n",sb->buf);
 }
 
 void strbuf_add_real_path(struct strbuf *sb, const char *path)

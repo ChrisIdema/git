@@ -1125,8 +1125,10 @@ static void repo_discovery_set_gitdir(struct repo_discovery *r,
 static void repo_discovery_set_worktree(struct repo_discovery *r,
 					const char *worktree)
 {
+	fprintf(stderr, "repo_discovery_set_worktree %s\n", worktree);
 	free(r->worktree);
-	r->worktree = real_pathdup(worktree, 1);
+	//r->worktree = real_pathdup(worktree, 1);
+	r->worktree = absolute_pathdup(worktree);	
 }
 
 static void repo_discover_explicit_gitdir(struct repo_discovery *discovery,
@@ -1226,6 +1228,7 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 					  int *nongit_ok)
 {
 	fprintf(stderr, "repo_discover_implicit_gitdir\n");
+	fprintf(stderr, "xgetcwd1 %s\n", xgetcwd());
 	if (read_and_verify_repository_format(&discovery->format, gitdir, nongit_ok)){
 		fprintf(stderr, "read_and_verify_repository_format!=0\n");
 		return;
@@ -1259,9 +1262,11 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 	}
 
 	/* #0, #1, #5, #8, #9, #12, #13 */
-	fprintf(stderr, "tes1t: %s\n", discovery->worktree);
+	fprintf(stderr, "xgetcwd2 %s\n", xgetcwd());
+	fprintf(stderr, "test1: %s\n", discovery->worktree);
 	repo_discovery_set_worktree(discovery, ".");
 	fprintf(stderr, "test2: %s\n", discovery->worktree);
+	fprintf(stderr, "xgetcwd3 %s\n", xgetcwd());
 	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT)){		
 		fprintf(stderr, "condition4\n");
 		repo_discovery_set_gitdir(discovery, gitdir, 0);
@@ -2002,6 +2007,8 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 	struct strbuf cwd = STRBUF_INIT;
 	struct strbuf dir = STRBUF_INIT, gitdir = STRBUF_INIT, report = STRBUF_INIT;
 
+	fprintf(stderr, "repo_discover\n");
+	fprintf(stderr, "xgetcwd %s\n", xgetcwd());
 	/*
 	 * Let's assume that we are in a git repository.
 	 * If it turns out later that we are somewhere else, the value will be
@@ -2023,9 +2030,10 @@ static void repo_discover(struct repo_discovery *discovery, int *nongit_ok)
 					      nongit_ok);
 		break;
 	case GIT_DIR_DISCOVERED:
-		if (dir.len < cwd.len && chdir(dir.buf))
+		if (dir.len < cwd.len && chdir(dir.buf)) // chdir modifies cwd, so cwd and pwd no longer match
 			die(_("cannot change to '%s'"), dir.buf);
 		fprintf(stderr, "dir: %s\n", dir.buf);
+		fprintf(stderr, "xgetcwd %s\n", xgetcwd());
 		repo_discover_implicit_gitdir(discovery, gitdir.buf, &cwd, dir.len,
 					      nongit_ok);
 		fprintf(stderr, "discovery.gitdir: %s\n", discovery->gitdir);
@@ -2095,6 +2103,9 @@ const char *setup_git_directory_gently(struct repository *repo, int *nongit_ok)
 {
 	struct repo_discovery discovery = REPO_DISCOVERY_INIT;
 
+	fprintf(stderr, "setup_git_directory_gently\n");
+	fprintf(stderr, "xgetcwd %s\n", xgetcwd());
+
 	/*
 	 * We may have read an incomplete configuration before
 	 * setting-up the git directory. If so, clear the cache so
@@ -2102,6 +2113,7 @@ const char *setup_git_directory_gently(struct repository *repo, int *nongit_ok)
 	 * configuration (including the per-repo config file that we
 	 * ignored previously).
 	 */
+
 	repo_config_clear(repo);
 
 	repo_discover(&discovery, nongit_ok);
