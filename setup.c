@@ -1127,7 +1127,7 @@ static void repo_discovery_set_worktree(struct repo_discovery *r,
 {
 	free(r->worktree);
 	//r->worktree = real_pathdup(worktree, 1);
-	r->worktree = absolute_pathdup(worktree);	
+	r->worktree = absolute_pathdup(worktree);
 }
 
 static void repo_discover_explicit_gitdir(struct repo_discovery *discovery,
@@ -1230,9 +1230,9 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 	if (getenv(GIT_WORK_TREE_ENVIRONMENT) || discovery->format.work_tree) {
 		char *to_free = NULL;
 
-		if (offset != cwd->len && !is_absolute_path(gitdir)) 
+		if (offset != cwd->len && !is_absolute_path(gitdir))
 			gitdir = to_free = real_pathdup(gitdir, 1);
-	
+
 		if (chdir(cwd->buf))
 			die_errno(_("cannot come back to cwd"));
 		repo_discover_explicit_gitdir(discovery, gitdir, cwd,
@@ -1251,7 +1251,7 @@ static void repo_discover_implicit_gitdir(struct repo_discovery *discovery,
 
 	/* #0, #1, #5, #8, #9, #12, #13 */
 	repo_discovery_set_worktree(discovery, ".");
-	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT)){		
+	if (strcmp(gitdir, DEFAULT_GIT_DIR_ENVIRONMENT)){
 		repo_discovery_set_gitdir(discovery, gitdir, 0);
 	}
 	if (offset >= cwd->len){
@@ -1980,7 +1980,7 @@ void strbuf_add_pwd(struct strbuf *sb)
 	// if (sb->len > orig_len && !is_dir_sep(sb->buf[sb->len - 1]))
 	// 	strbuf_addch(sb, '/');
 	free(cwd);
-	
+
 	// strbuf_addstr(sb, path);
 }
 

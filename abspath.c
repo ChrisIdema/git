@@ -311,7 +311,7 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		if (sb->len > orig_len && !is_dir_sep(sb->buf[sb->len - 1]))
 			strbuf_addch(sb, '/');
 		free(cwd);
-	}	
+	}
 	strbuf_addstr(sb, path);
 }
 
